@@ -33,6 +33,31 @@ Add the following frameworks and libs to your project :
     * RevMobAds.framework  
     * libChartboost.a (add all *.h files from the Chartboost lib)
 
+#Code
+
+//Init ads networks
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+    //BRFullscreenAd config : Must be called first
+    [BRFullScreenAd startRevMobSessionWithAppID:@"REV_MOB_APP_ID"];
+    [BRFullScreenAd startChartboostSessionWithAppId:@"CHARTBOOST_APP_ID"
+                                    andAppSignature:@"CHARTBOOST_APP_SIGNATURE"];
+    //End
+
+    [...]
+    
+    return YES;
+}
+
+//Fire ad
+- (void)applicationDidBecomeActive:(UIApplication *)application
+{
+    [BRFullScreenAd presentAd];
+    
+}
+
+
+
 #License
 
 BSD License

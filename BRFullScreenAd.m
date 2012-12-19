@@ -57,16 +57,7 @@ static const NSInteger kAnimationDuration = .5;
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    
-    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(createAdContent)
-                                                 name:@"UIDeviceOrientationDidChangeNotification"
-                                               object:nil];
-    [self createAdContent];
-}
+#pragma mark - BRFullScreenAd methods
 
 - (void)createAdContent {
     UIWindow* mainWindow = [UIApplication sharedApplication].keyWindow;
@@ -83,7 +74,7 @@ static const NSInteger kAnimationDuration = .5;
 
 - (void)createAdContentSelector {
     static NSString *adImageName = nil;
-
+    
     if (_adContent) {
         [_adContent removeFromSuperview];
     } else {
@@ -110,13 +101,13 @@ static const NSInteger kAnimationDuration = .5;
                                    [[UIImage imageNamed:@"adSplashBorder.png"]
                                     stretchableImageWithLeftCapWidth:20 topCapHeight:20]];
     [adSplashBorder setFrame:CGRectMake(0, 15, _adContent.bounds.size.width - 15, _adContent.bounds.size.height - 15)];
-
+    
     UIImageView *adBackground = [[UIImageView alloc] initWithImage:[UIImage imageNamed:adImageName]];
     [adBackground setContentMode:UIViewContentModeScaleAspectFill];
     [adBackground setClipsToBounds:YES];
     adBackground.layer.cornerRadius = 20;
     adBackground.frame = adSplashBorder.frame;
-
+    
     [_adContent addSubview:adBackground];
     [_adContent addSubview:adSplashBorder];
     
@@ -158,6 +149,19 @@ static const NSInteger kAnimationDuration = .5;
     [closeButton addTarget:self action:@selector(closeAd:) forControlEvents:UIControlEventTouchUpInside];
     [closeButton setFrame:CGRectMake(_adContent.frame.size.width - 40, 0, 40, 40)];
     [_adContent addSubview:closeButton];
+}
+
+#pragma mark - UIViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(createAdContent)
+                                                 name:@"UIDeviceOrientationDidChangeNotification"
+                                               object:nil];
+    [self createAdContent];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
