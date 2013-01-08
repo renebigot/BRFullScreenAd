@@ -6,7 +6,7 @@ The Revmob ads are some custom interstitials. I don't use Revmob original one ca
 
 The Chartboost's one are provided by Chartboost without modification.
 
-It's the same class I use in my Twins4Kids app.
+It's the same class I use in my apps.
 
 #Screen shots
 
@@ -14,7 +14,7 @@ Chartboost ad
 ![Chartboost](https://github.com/renebigot/BRFullScreenAd/raw/master/screenshot1.png)
 
 Revmob custom interstitial in landscape  
-![Revmob](https://github.com/renebigot/BRFullScreenAd/raw/master/screenshot.png)
+![Revmob](https://github.com/renebigot/BRFullScreenAd/raw/master/screenshot2.png)
 
 Revmob custom interstitial in portrait  
 ![Revmob](https://github.com/renebigot/BRFullScreenAd/raw/master/screenshot3.png)
@@ -35,26 +35,26 @@ Add the following frameworks and libs to your project :
 
 #Code
 
-//Init ads networks
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
-    //BRFullscreenAd config : Must be called first
-    [BRFullScreenAd startRevMobSessionWithAppID:@"REV_MOB_APP_ID"];
-    [BRFullScreenAd startChartboostSessionWithAppId:@"CHARTBOOST_APP_ID"
-                                    andAppSignature:@"CHARTBOOST_APP_SIGNATURE"];
-    //End
-
-    [...]
+    //Init ads networks
+    - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+    {
+        //BRFullscreenAd config : Must be called first
+        [BRFullScreenAd startRevMobSessionWithAppID:@"REV_MOB_APP_ID"];
+        [BRFullScreenAd startChartboostSessionWithAppId:@"CHARTBOOST_APP_ID"
+                                        andAppSignature:@"CHARTBOOST_APP_SIGNATURE"];
+        //End
     
-    return YES;
-}
+        [...]
+        
+        return YES;
+    }
 
-//Fire ad
-- (void)applicationDidBecomeActive:(UIApplication *)application
-{
-    [BRFullScreenAd presentAd];
-    
-}
+    //Fire ad
+    - (void)applicationDidBecomeActive:(UIApplication *)application
+    {
+        [BRFullScreenAd presentAd];
+        
+    }
 
 
 
@@ -62,5 +62,5 @@ Add the following frameworks and libs to your project :
 
 BSD License
 
-Copyright (c) 2012 René BIGOT
+Copyright (c) 2012-2013 René BIGOT
 
