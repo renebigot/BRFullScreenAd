@@ -25,5 +25,6 @@
 - (IBAction)openAdLink:(id)sender;
 
 @property (nonatomic, strong) UIView *adContent;
+@property (nonatomic, strong) UIView *loadingView;
 
 @end

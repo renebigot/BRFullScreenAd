@@ -11,6 +11,7 @@
 @implementation BRFullScreenAd
 
 static BRFullScreenAd *_sharedFullScreenAd = nil;
+static UIViewController *_topMostController = nil;
 static Chartboost *_sharedChartboost = nil;
 static const NSInteger kAnimationDuration = .5;
 
@@ -31,6 +32,10 @@ static const NSInteger kAnimationDuration = .5;
 + (void)presentAd {
     BOOL showChartboost = [[NSUserDefaults standardUserDefaults] boolForKey:@"showChartboostAd"];
     
+    if (_sharedFullScreenAd.loadingView) {
+        [_sharedFullScreenAd.loadingView removeFromSuperview];
+    }
+
     //If no cached chartboost ad, show revmob
     if (showChartboost && [_sharedChartboost hasCachedInterstitial]) {
         [_sharedChartboost showInterstitial];
@@ -42,20 +47,39 @@ static const NSInteger kAnimationDuration = .5;
         }
         
         _sharedFullScreenAd = [[BRFullScreenAd alloc] init];
-       
-        UIWindow* mainWindow = [UIApplication sharedApplication].keyWindow;
-        if (!mainWindow)
-            mainWindow = [[UIApplication sharedApplication].windows objectAtIndex:0];
-
+        
         [_sharedFullScreenAd.view setHidden:YES];
-        [_sharedFullScreenAd.view setFrame:mainWindow.frame];
-        UIView *mainWindowView = [[mainWindow subviews] objectAtIndex:0];
-        [mainWindowView addSubview:_sharedFullScreenAd.view];
+        _topMostController = [BRFullScreenAd topMostController];
+        [_sharedFullScreenAd.view setFrame:_topMostController.view.frame];
+        
+        [_topMostController.view addSubview:_sharedFullScreenAd.view];
+
+        //Need to present a modal view controller to fire _sharedFullScreenAd viewDidAppear... Don't know why...
+        UIViewController *unusedVC = [[UIViewController alloc] init];
+        if ([_topMostController respondsToSelector:@selector(presentViewController:animated:completion:)]) {
+            [_topMostController presentViewController:unusedVC animated:NO completion:NULL];
+        } else {
+            [_topMostController presentModalViewController:unusedVC animated:NO];
+        }
+        [unusedVC dismissModalViewControllerAnimated:NO];
     }
     
     [[NSUserDefaults standardUserDefaults] setBool:!showChartboost forKey:@"showChartboostAd"];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
+
++ (UIViewController*)topMostController {
+    UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
+    NSLog(@"Top most ViewController : %@", topController);
+
+    while (topController.presentedViewController) {
+        topController = topController.presentedViewController;
+        NSLog(@"Top most ViewController : %@", topController);
+    }
+    
+    return topController;
+}
+
 
 #pragma mark - BRFullScreenAd methods
 
@@ -166,7 +190,7 @@ static const NSInteger kAnimationDuration = .5;
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-
+    
     [self.view setHidden:NO];
     CALayer *adContentLayer = self.adContent.layer;
     
@@ -194,9 +218,26 @@ static const NSInteger kAnimationDuration = .5;
     [adContentLayer addAnimation:translationZ forKey:@"transform.translation.z"];
 }
 
-- (IBAction)openAdLink:(id)sender {
-    [[RevMobAds revMobAds] openAdLinkWithDelegate:self];
+- (void)showLoadingView {
+    if (!self.loadingView) {
+        self.loadingView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+        [self.loadingView setCenter:CGPointMake(_topMostController.view.bounds.size.width / 2, _topMostController.view.bounds.size.height / 2)];
+        [self.loadingView.layer setCornerRadius:15];
+        [self.loadingView setOpaque:NO];
+        [self.loadingView setBackgroundColor:[UIColor colorWithWhite:0 alpha:.8]];
+        
+        UIActivityIndicatorView *activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+        [activityIndicatorView setCenter:CGPointMake(self.loadingView.frame.size.width / 2, self.loadingView.frame.size.width / 2)];
+        [activityIndicatorView startAnimating];
+        [self.loadingView addSubview:activityIndicatorView];
+    }
+    [_topMostController.view addSubview:self.loadingView];
+}
 
+- (IBAction)openAdLink:(id)sender {
+    [self showLoadingView];
+    [[RevMobAds revMobAds] openAdLinkWithDelegate:self];
+    
     [self closeAd:nil];
 }
 
@@ -206,7 +247,7 @@ static const NSInteger kAnimationDuration = .5;
     CATransform3D layerTransform = CATransform3DIdentity;
     layerTransform.m34 = 1.0 / 500;
     adContentLayer.transform = layerTransform;
-
+    
     CABasicAnimation *rotationY = [CABasicAnimation animationWithKeyPath:@"transform.rotation.y"];
     rotationY.duration = kAnimationDuration;
     rotationY.fromValue = [NSNumber numberWithFloat:0];
@@ -224,8 +265,8 @@ static const NSInteger kAnimationDuration = .5;
     translationZ.fromValue = [NSNumber numberWithFloat:0];
     translationZ.toValue = [NSNumber numberWithFloat:adContentLayer.frame.size.width/2];
     [adContentLayer addAnimation:translationZ forKey:@"transform.translation.z"];
-
-
+    
+    
     [self performSelector:@selector(hideAd) withObject:nil afterDelay:.25];
 }
 
