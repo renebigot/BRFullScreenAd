@@ -17,6 +17,7 @@
 }
 
 + (void)presentAd;
++ (BRFullScreenAd *)sharedFullScreenAd;
 + (void)startRevMobSessionWithAppID:(NSString *)revmobAppId;
 + (void)startChartboostSessionWithAppId:(NSString *)chartboostAppId
                         andAppSignature:(NSString *)chartboostAppSignature;

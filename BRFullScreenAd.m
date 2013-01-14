@@ -29,6 +29,10 @@ static const NSInteger kAnimationDuration = .5;
     [_sharedChartboost cacheInterstitial];
 }
 
++ (BRFullScreenAd *)sharedFullScreenAd {
+    return _sharedFullScreenAd;
+}
+
 + (void)presentAd {
     BOOL showChartboost = [[NSUserDefaults standardUserDefaults] boolForKey:@"showChartboostAd"];
     
@@ -54,7 +58,7 @@ static const NSInteger kAnimationDuration = .5;
         
         [_topMostController.view addSubview:_sharedFullScreenAd.view];
 
-        //Need to present a modal view controller to fire _sharedFullScreenAd viewDidAppear... Don't know why...
+        //Need to present a modal view controller to fire [_sharedFullScreenAd viewDidAppear]... Don't know why...
         UIViewController *unusedVC = [[UIViewController alloc] init];
         if ([_topMostController respondsToSelector:@selector(presentViewController:animated:completion:)]) {
             [_topMostController presentViewController:unusedVC animated:NO completion:NULL];
@@ -101,9 +105,8 @@ static const NSInteger kAnimationDuration = .5;
     
     if (_adContent) {
         [_adContent removeFromSuperview];
-    } else {
-        adImageName = [NSString stringWithFormat:@"adSplashBackground_%d.png", arc4random_uniform(4)+1];
     }
+    adImageName = [NSString stringWithFormat:@"adSplashBackground_%d.png", arc4random_uniform(4)+1];
     
     [self.view setBackgroundColor:[UIColor colorWithWhite:0. alpha:0.5]];
     [self.view setOpaque:NO];
@@ -233,6 +236,11 @@ static const NSInteger kAnimationDuration = .5;
     }
     [_topMostController.view addSubview:self.loadingView];
 }
+
+- (void)revmobAdDidFailWithError:(NSError *)error {
+    [self.loadingView removeFromSuperview];
+}
+//- (void)revmobAdDisplayed;
 
 - (IBAction)openAdLink:(id)sender {
     [self showLoadingView];
